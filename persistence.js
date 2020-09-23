@@ -128,11 +128,13 @@ app.get('/api/search', (req, res) => {
                     console.log(result);
                     const resultJSON = JSON.parse(result.Body);
 
+                    let redisJSON = JSON.parse(result.Body);
+                    redisJSON.source = 'Redis Cache';
+
                     // add result from S3 to Redis
                     redisClient.setex(searchingKey, 60,
                         JSON.stringify({
-                            source: 'Redis Cache',
-                            ...resultJSON,
+                            ...redisJSON,
                         })
                     );
                     // serve from S3
