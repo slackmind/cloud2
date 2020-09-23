@@ -126,9 +126,11 @@ app.get('/api/search', (req, res) => {
 
                     console.log("Returning result from S3");
                     console.log(result);
+                    // parse returned result
                     const resultJSON = JSON.parse(result.Body);
 
                     let redisJSON = JSON.parse(result.Body);
+                    // update where you got it from
                     redisJSON.source = 'Redis Cache';
 
                     // add result from S3 to Redis
@@ -158,10 +160,12 @@ app.get('/api/search', (req, res) => {
                                 Key: searchingKey,
                                 Body: body
                             };
+
+                            // send to bucket
                             const uploadPromise = new AWS.S3({
                                 apiVersion: '2006-03-01'
                             }).putObject(objectParams).promise();
-
+                            // inform console of success
                             uploadPromise.then(function(data) {
                                 console.log("Good news!");
                                 console.log("Successfully uploaded data to " + bucketName +
