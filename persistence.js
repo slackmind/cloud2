@@ -7,7 +7,7 @@ const redis = require('redis');
 const app = express();
 
 // create unique bucket name
-const bucketName = 'johnyoungatqut-wikipedia-store';
+const bucketName = 'john-y-qut-wikibuket';
 // create redisClient
 const redisClient = redis.createClient();
 // check redis works
@@ -23,6 +23,7 @@ const bucketPromise = new AWS.S3({
     Bucket: bucketName
 }).promise();
 
+// try to make the bucket
 bucketPromise.then(function (data) {
         console.log("Successfully created " + bucketName);
     })
@@ -31,11 +32,12 @@ bucketPromise.then(function (data) {
         console.log(error, error.stack);
     });
 
-
+// route for storing articles in the buckets
 app.get('/api/store', (req, res) => {
-
+    // what was searched
     const key = (req.query.key).trim();
     console.log(req.query);
+
     // Construct the wiki URL and the key
     const searchUrl = `https://en.wikipedia.org/w/api.php?action=parse&format=json&section=0&page=${key}`;
     const searchingKey = `wikipedia-${key}`;
@@ -44,7 +46,7 @@ app.get('/api/store', (req, res) => {
         Bucket: bucketName,
         Key: searchingKey
     };
-
+    // try to return from S3
     return new AWS.S3({
             apiVersion: '2006-03-01'
         })
@@ -92,10 +94,11 @@ app.get('/api/store', (req, res) => {
         });
 })
 
+// search for a term, which checks redis then S3 then wikipedia
 app.get('/api/search', (req, res) => {
     const key = (req.query.key).trim();
 
-    // Construct the wiki URL and s3 key
+    // Construct the wiki URL and S3 key
     const searchUrl = `https://en.wikipedia.org/w/api.php?action=parse&format=json&section=0&page=${key}`;
     const searchingKey = `wikipedia-${key}`;
 
@@ -119,6 +122,7 @@ app.get('/api/search', (req, res) => {
                 Key: searchingKey
             };
 
+            // attempt to return from S3
             return new AWS.S3({
                 apiVersion: '2006-03-01'
             }).getObject(params, (err, result) => {
