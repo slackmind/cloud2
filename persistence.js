@@ -150,6 +150,7 @@ app.get('/api/search', (req, res) => {
                 } else {
 
                     // serve from wikipedia API and store in S3 and in redis
+                    console.log("Trying from wikipedia API");
                     return axios.get(searchUrl)
                         .then(response => {
                             console.log("Storing in S3 bucket");
@@ -166,6 +167,7 @@ app.get('/api/search', (req, res) => {
                             };
 
                             // send to bucket
+                            console.log("Uploading to S3");
                             const uploadPromise = new AWS.S3({
                                 apiVersion: '2006-03-01'
                             }).putObject(objectParams).promise();
@@ -177,6 +179,7 @@ app.get('/api/search', (req, res) => {
                             });
 
                             // add to redis
+                            console.log("Adding to Redis Cache");
                             redisClient.setex(
                                 searchingKey, 60,
                                 JSON.stringify({
